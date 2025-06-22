@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Viberrr",
+  "version": "1.0",
+  "description": "Adds a pin button to each user prompt in ChatGPT to pin and quickly return to it with colored floating buttons.",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}
