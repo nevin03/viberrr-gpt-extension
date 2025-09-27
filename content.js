@@ -1,12 +1,23 @@
 document.addEventListener("DOMContentLoaded", initializeBulletinButtons);
 
-const observer = new MutationObserver((mutations) => {
+const observer = new MutationObserver(() => {
   initializeBulletinButtons();
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Array of colors for floating buttons
-const colors = ["#4CAF50", "#2196F3", "#F44336", "#FF9800", "#9C27B0"]; // Green, Blue, Red, Orange, Purple
+function trimLabelText(label) {
+  const maxChars = 10;
+  const maxWords = 3;
+
+  if (label.length <= maxChars) return label;
+
+  const words = label.split(" ");
+  if (words.length <= maxWords) {
+    return label.length > maxChars ? label.slice(0, maxChars) + "..." : label;
+  }
+
+  return words.slice(0, maxWords).join(" ") + "...";
+}
 
 function initializeBulletinButtons() {
   const userMessages = document.querySelectorAll(
@@ -14,50 +25,92 @@ function initializeBulletinButtons() {
   );
 
   userMessages.forEach((message, index) => {
+    const msgId = `message-${index}`;
+
     if (message.querySelector(".bulletin-button")) return;
 
     const button = document.createElement("button");
     button.className = "bulletin-button";
     button.innerHTML = "📌";
     button.title = "Pin this prompt";
-    button.dataset.messageId = `message-${index}`;
+    button.dataset.messageId = msgId;
     message.style.position = "relative";
     message.appendChild(button);
 
     button.addEventListener("click", () => {
-      // Check if this message is already pinned
-      const existingFloatButton = document.querySelector(
-        `#floating-bulletin-${button.dataset.messageId}`
-      );
-      if (existingFloatButton) return; // Prevent duplicate pins
+      let floatContainer = document.querySelector(`#floating-bulletin-${msgId}`);
 
-      // Get the next color in the cycle
-      const colorIndex =
-        document.querySelectorAll(".floating-bulletin-button").length %
-        colors.length;
-      const buttonColor = colors[colorIndex];
+      if (!floatContainer) {
+        floatContainer = document.createElement("div");
+        floatContainer.className = "floating-bulletin-container";
+        floatContainer.id = `floating-bulletin-${msgId}`;
+        document.body.appendChild(floatContainer);
+      }
 
-      // Create floating button on left side
+      const label = prompt("Enter a label for this pin:", "My Pin");
+      if (!label) return;
+
+      const trimmed = label.trim();
+      if (!trimmed) return;
+
+      // Check duplicates (case-insensitive)
+      const existingLabels = Array.from(
+        floatContainer.querySelectorAll(".floating-bulletin-button")
+      ).map(btn => btn.title.toLowerCase());
+
+      if (existingLabels.includes(trimmed.toLowerCase())) {
+        alert("This label already exists for this message.");
+        return;
+      }
+
+      // Label button with trimmed text and full text in title for tooltip
       const floatButton = document.createElement("button");
-      floatButton.id = `floating-bulletin-${button.dataset.messageId}`;
       floatButton.className = "floating-bulletin-button";
-      floatButton.style.backgroundColor = buttonColor;
-      floatButton.innerHTML = "📌";
-      floatButton.title = "Return to pinned prompt";
-      document.body.appendChild(floatButton);
+      floatButton.textContent = trimLabelText(trimmed);
+      floatButton.title = trimmed;
 
-      // Position floating buttons vertically (stacked)
-      const allFloatButtons = document.querySelectorAll(
-        ".floating-bulletin-button"
-      );
-      allFloatButtons.forEach((btn, idx) => {
-        btn.style.top = `${50 + idx * 50}px`; // Stack buttons 50px apart
+      // Delete button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "floating-bulletin-delete";
+      deleteBtn.textContent = "🧹";
+      deleteBtn.title = "Remove this pin";
+
+      // Container for label + delete
+      const pinWrapper = document.createElement("div");
+      pinWrapper.style.display = "flex";
+      pinWrapper.style.alignItems = "center";
+      pinWrapper.style.gap = "4px";
+
+      pinWrapper.appendChild(floatButton);
+      pinWrapper.appendChild(deleteBtn);
+      floatContainer.insertBefore(pinWrapper, floatContainer.firstChild);
+
+      updateFloatingButtonPositions();
+
+      // Scroll to message on label click
+      floatButton.addEventListener("click", () => {
+        message.scrollIntoView({ behavior: "smooth", block: "center" });
       });
 
-      // Add click event to scroll back to pinned message
-      floatButton.addEventListener("click", () => {
-        message.scrollIntoView({ behavior: "smooth" });
+      // Delete pin on click
+      deleteBtn.addEventListener("click", () => {
+        pinWrapper.remove();
+        if (floatContainer.children.length === 0) {
+          floatContainer.remove();
+        }
+        updateFloatingButtonPositions();
       });
     });
+  });
+}
+
+function updateFloatingButtonPositions() {
+  const allContainers = document.querySelectorAll(".floating-bulletin-container");
+  const gap = 50;
+  const baseBottom = 20;
+
+  allContainers.forEach((container, idx) => {
+    container.style.bottom = `${baseBottom + idx * gap}px`;
+    container.style.right = "20px";
   });
 }

@@ -1,9 +1,9 @@
 .bulletin-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
+  top: 8px;
+  right: -35px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background-color: #f0f0f0;
   color: #333;
@@ -14,40 +14,59 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s;
+  z-index: 10;
 }
-
 .bulletin-button:hover {
   background-color: #e0e0e0;
 }
-
 .bulletin-button:active {
   background-color: #d0d0d0;
 }
 
-#floating-bulletin-button {
+.floating-bulletin-container {
   position: fixed;
-  top: 50%;
-  right: 10px;
+  bottom: 20px;
+  right: 20px;
   z-index: 1000;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #4CAF50;
-  color: white;
-  font-size: 20px;
+  display: flex;
+  flex-direction: column;  /* vertical list */
+  gap: 8px;
+  max-height: 80vh;
+  overflow-y: auto;
+  width: 150px;
+}
+
+
+.floating-bulletin-button {
+  padding: 6px 12px;
+  min-width: 80px;
+  text-align: center;
+  border-radius: 6px;
+  background-color: #333;
+  color: #fff;
+  font-size: 14px;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   transition: background-color 0.3s;
 }
-
-#floating-bulletin-button:hover {
-  background-color: #45a049;
+.floating-bulletin-button:hover {
+  background-color: #555;
 }
 
-#floating-bulletin-button:active {
-  background-color: #3d8b40;
+.floating-bulletin-delete {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s ease;
+}
+.floating-bulletin-delete:hover {
+  background: rgba(255, 210, 11, 0.618);
+  border-color: rgba(255, 210, 11, 0.9);
 }
